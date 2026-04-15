@@ -1,0 +1,12 @@
+venv/
+.env
+note.txt
+logs/
+__pycache__/
+*.pyc
+*.log
+instance/
+**/.ipynb_checkpoints/
+.DS_Store
+wandb/
+saved_models/
