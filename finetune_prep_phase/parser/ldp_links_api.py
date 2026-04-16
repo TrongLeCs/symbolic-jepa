@@ -143,7 +143,7 @@ def build_edges(tokens: List[str]) -> List[Tuple[int, int]]:
     return edges
 
 
-def build_dfg_matrix(
+def build_ldp_matrix(
     N: int, edges: List[Tuple[int, int]], ignored_indices: List[int]
 ) -> np.ndarray:
     mat = np.zeros((1, N, N), dtype=np.int8)
@@ -170,7 +170,7 @@ def build_predicate_vocab(tokens: List[str]) -> Tuple[Dict[str, int], List[int]]
 
 
 # =========================
-# 3) Căn chỉnh T5 (skip whitespace pieces) + chiếu nhãn/DFG
+# 3) Căn chỉnh T5 (skip whitespace pieces) + chiếu nhãn/LDP
 # =========================
 def t5_tokenize(
     text_norm: str, tokenizer, max_length
@@ -284,18 +284,18 @@ def project_edges_to_t5(
 
 
 # =========================
-# 4) API chính: DFG (FOL & T5)
+# 4) API chính: LDP (FOL & T5)
 # =========================
-def build_dfg_links_tokenlevel(expr: str, tokenizer, max_length) -> Dict[str, Any]:
+def build_ldp_links_tokenlevel(expr: str, tokenizer, max_length) -> Dict[str, Any]:
     """
-    Xây DFG ở mức FOL và chiếu sang mức T5 pieces (đã lọc whitespace pieces).
+    Xây LDP ở mức FOL và chiếu sang mức T5 pieces (đã lọc whitespace pieces).
     """
     # FOL
     text_norm, fol_tokens, fol_spans = fol_tokenize_with_spans(expr)
     types_fol = tag_token_types(fol_tokens)
     edges_fol = build_edges(fol_tokens)
     ignored_fol_idx = [i for i, t in enumerate(fol_tokens) if t in IGNORED_TOKENS]
-    dfg_fol = build_dfg_matrix(len(fol_tokens), edges_fol, ignored_fol_idx)
+    ldp_fol = build_ldp_matrix(len(fol_tokens), edges_fol, ignored_fol_idx)
     predicate_vocab, token_predicate_id_fol = build_predicate_vocab(fol_tokens)
 
     # T5
@@ -330,14 +330,14 @@ def build_dfg_links_tokenlevel(expr: str, tokenizer, max_length) -> Dict[str, An
         elif fol_tokens[fi] in IGNORED_TOKENS:
             ignored_t5_idx.append(pi)
 
-    dfg_t5 = build_dfg_matrix(len(input_ids), edges_t5, ignored_t5_idx)
+    ldp_t5 = build_ldp_matrix(len(input_ids), edges_t5, ignored_t5_idx)
 
     return {
         "text_norm": text_norm,
         "fol_tokens": fol_tokens,
         "fol_spans": fol_spans,
         "types_fol": types_fol,
-        "dfg_links_fol": dfg_fol,
+        "ldp_links_fol": ldp_fol,
         "predicate_vocab": predicate_vocab,
         "token_predicate_id_fol": np.array(token_predicate_id_fol, dtype=np.int32),
         "input_ids": np.array(input_ids, dtype=np.int32),
@@ -348,7 +348,7 @@ def build_dfg_links_tokenlevel(expr: str, tokenizer, max_length) -> Dict[str, An
         "fol2piece": fol2piece,
         "types_t5": types_t5,
         "token_predicate_id_t5": np.array(token_predicate_id_t5, dtype=np.int32),
-        "dfg_links_t5": dfg_t5,
+        "ldp_links_t5": ldp_t5,
     }
 
 
@@ -396,8 +396,8 @@ if __name__ == "__main__":
     tokenizer = T5TokenizerFast.from_pretrained("tokenizers-extended")
     expr = "(FORALL x (mirror(x) IMPLIES reflect_light(x))) AND ( FORALL x (reflect_light(x) IMPLIES create_image(x)))"
 
-    graph = build_dfg_links_tokenlevel(
-        expr=expr, tokenizer=tokenizer, project_mode="first"
+    graph = build_ldp_links_tokenlevel(
+        expr=expr, tokenizer=tokenizer, max_length=256
     )
 
     # In kết quả
@@ -423,20 +423,20 @@ if __name__ == "__main__":
             f"{i:2d}: {tok:18s} off={offsets[i]}  map_fol={fol_idx:2d}  type={types_t5[i]:12s}  pred_id={int(token_predicate_id_t5[i])}"
         )
 
-    # DFG (FOL)
-    print("\n=== DFG (FOL) edges where value==1 ===")
-    dfg_fol = graph["dfg_links_fol"]
-    pairs_fol = np.argwhere(dfg_fol[0] == 1)
+    # LDP (FOL)
+    print("\n=== LDP (FOL) edges where value==1 ===")
+    ldp_fol = graph["ldp_links_fol"]
+    pairs_fol = np.argwhere(ldp_fol[0] == 1)
     for i, j in pairs_fol:
         print(f"{i} -> {j}   ({fol_tokens[i]} -> {fol_tokens[j]})")
-    print("DFG (FOL) Matrix shape:", dfg_fol.shape)
+    print("LDP (FOL) Matrix shape:", ldp_fol.shape)
 
-    # DFG (T5) — đã lọc whitespace pieces khi align
-    print("\n=== DFG (T5) edges where value==1 (projected, first-subtoken) ===")
-    dfg_t5 = graph["dfg_links_t5"]
-    pairs_t5 = np.argwhere(dfg_t5[0] == 1)
+    # LDP (T5) — đã lọc whitespace pieces khi align
+    print("\n=== LDP (T5) edges where value==1 (projected, first-subtoken) ===")
+    ldp_t5 = graph["ldp_links_t5"]
+    pairs_t5 = np.argwhere(ldp_t5[0] == 1)
     for i, j in pairs_t5:
         print(f"{i} -> {j}   ({t5_tokens[i]} -> {t5_tokens[j]})")
-    print("DFG (T5) Matrix shape:", dfg_t5.shape)
+    print("LDP (T5) Matrix shape:", ldp_t5.shape)
 
     print("\nPredicate vocab:", graph["predicate_vocab"])

@@ -1,7 +1,7 @@
-# ast_paths_tokenlevel_t5fast.py
-# Build AST path labels *at T5TokenizerFast piece level* (1:1 with decoder hidden states)
+# cpp_paths_tokenlevel_t5fast.py
+# Build CPP path labels *at T5TokenizerFast piece level* (1:1 with decoder hidden states)
 # - No node pooling
-# - Only AST Path (no DFG here)
+# - Only CPP Path (no LDP here)
 # - Works with T5TokenizerFast using offset_mapping to align FOL tokens -> subword pieces
 
 from typing import List, Tuple, Dict, Any, Optional
@@ -25,7 +25,7 @@ except Exception:
 # ===== Normalize & basic FOL tokenization with spans (for alignment) =====
 
 
-# ===== Minimal AST builder (no '.') =====
+# ===== Minimal CPP builder (no '.') =====
 class Node:
     __slots__ = (
         "kind",
@@ -340,10 +340,10 @@ def align_t5_pieces_to_fol(
     return out
 
 
-# ======= Public API: build AST paths at T5 piece-level =======
+# ======= Public API: build CPP paths at T5 piece-level =======
 
 
-def build_ast_paths_tokenlevel(
+def build_cpp_paths_tokenlevel(
     expr: str,
     tokenizer: str,
     max_depth: int = 8,
@@ -359,8 +359,8 @@ def build_ast_paths_tokenlevel(
       - attention_mask: List[int]
       - offsets: List[(start,end)] per piece (same space as text_norm)
       - piece2fol: List[int] mapping each piece -> fol token idx
-      - ast_paths_fol: np.ndarray shape (1, L_fol, max_depth)
-      - ast_paths_t5:  np.ndarray shape (1, L_piece, max_depth)  (duplicated per piece)
+      - cpp_paths_fol: np.ndarray shape (1, L_fol, max_depth)
+      - cpp_paths_t5:  np.ndarray shape (1, L_piece, max_depth)  (duplicated per piece)
     """
     if type_vocab is None:
         type_vocab = DEFAULT_TYPE_VOCAB
@@ -370,7 +370,7 @@ def build_ast_paths_tokenlevel(
 
     # 2) Parse over FOL tokens and collect paths (at FOL-token level)
     root = parse_expression(fol_tokens)
-    ast_paths_fol = collect_paths_for_tokens(
+    cpp_paths_fol = collect_paths_for_tokens(
         fol_tokens, root, type_vocab, max_depth
     )
 
@@ -394,14 +394,14 @@ def build_ast_paths_tokenlevel(
         fol_spans, offsets, text_norm, piece_tokens=piece_tokens, ignore_whitespace=True
     )
 
-    # 5) Project AST paths onto piece level (duplicate labels for pieces of same FOL token)
+    # 5) Project CPP paths onto piece level (duplicate labels for pieces of same FOL token)
     L_piece = len(input_ids)
-    ast_paths_t5 = np.full((1, L_piece, max_depth), -1, dtype=np.int64)
+    cpp_paths_t5 = np.full((1, L_piece, max_depth), -1, dtype=np.int64)
     for j in range(L_piece):
         k = piece2fol[j]
         if k is None or k < 0:  # unmatched (e.g., zero-length piece)
             continue
-        ast_paths_t5[0, j, :] = ast_paths_fol[0, k, :]
+        cpp_paths_t5[0, j, :] = cpp_paths_fol[0, k, :]
 
     return {
         "text_norm": text_norm,
@@ -411,8 +411,8 @@ def build_ast_paths_tokenlevel(
         "attention_mask": attention_mask,
         "offsets": offsets,
         "piece2fol": piece2fol,
-        "ast_paths_fol": ast_paths_fol,
-        "ast_paths_t5": ast_paths_t5,
+        "cpp_paths_fol": cpp_paths_fol,
+        "cpp_paths_t5": cpp_paths_t5,
     }
 
 
@@ -426,12 +426,12 @@ if __name__ == "__main__":
     else:
         tok = T5TokenizerFast.from_pretrained(name)
         expr = "(FORALL x (item(x) AND break_easy_stress_impact(x) IMPLIES fragile(x)))"
-        out = build_ast_paths_tokenlevel(expr, tok, max_depth=6)
+        out = build_cpp_paths_tokenlevel(expr, tok, max_depth=6)
         print("text_norm:", out["text_norm"])
         print("fol_tokens:", out["fol_tokens"])
         print("fol_spans:", out["fol_spans"])
         print("input_ids:", out["input_ids"][:32])
         print("offsets   :", out["offsets"][:32])
         print("piece2fol :", out["piece2fol"][:32])
-        print("ast_paths_fol shape:", out["ast_paths_fol"].shape)
-        print("ast_paths_t5  shape:", out["ast_paths_t5"].shape)
+        print("cpp_paths_fol shape:", out["cpp_paths_fol"].shape)
+        print("cpp_paths_t5  shape:", out["cpp_paths_t5"].shape)

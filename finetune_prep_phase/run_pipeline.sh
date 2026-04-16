@@ -13,7 +13,7 @@ INPUT_JSON="data/sample.json"
 # Directory to save output files (.npz, .txt, .jsonl errors)
 OUTPUT_DIR="output/"
 
-# Prefix for output files (e.g. val -> val_ast_paths.npz)
+# Prefix for output files (e.g. val -> val_cpp_paths.npz)
 PREFIX="sample"
 
 # T5 tokenizer model name (can be a local path or huggingface model name)

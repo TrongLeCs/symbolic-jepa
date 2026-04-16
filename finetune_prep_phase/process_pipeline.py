@@ -6,8 +6,8 @@ from pathlib import Path
 
 from transformers import T5TokenizerFast
 
-from parser.ast_paths_builder import ASTPathsDatasetBuilderASTOnly
-from parser.dfg_links_builder import DFGLinksDatasetBuilderT5
+from parser.cpp_paths_builder import CPPPathsDatasetBuilderCPPOnly
+from parser.ldp_links_builder import LDPLinksDatasetBuilderT5
 from parser.fol_parser_builder import parse_and_dump
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -15,14 +15,14 @@ logger = logging.getLogger("process_pipeline")
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Unified Pipeline for processing Logic-JEPA DFG, AST, and Text trees"
+        description="Unified Pipeline for processing Logic-JEPA LDP, CPP, and Text trees"
     )
     parser.add_argument("--input", required=True, help="Path to input JSON (list of records).")
     parser.add_argument("--output_dir", required=True, help="Directory to save the generated outputs.")
-    parser.add_argument("--prefix", default="samples", help="Prefix for output files (e.g., 'val' -> val_ast_paths.npz).")
+    parser.add_argument("--prefix", default="samples", help="Prefix for output files (e.g., 'val' -> val_cpp_paths.npz).")
     parser.add_argument("--tokenizer", default="t5-base", help="T5 Tokenizer version to use.")
     parser.add_argument("--max_length", type=int, default=256, help="Maximum sequence length.")
-    parser.add_argument("--max_depth", type=int, default=10, help="Maximum AST depth.")
+    parser.add_argument("--max_depth", type=int, default=10, help="Maximum CPP depth.")
     parser.add_argument("--dump_text_tree", action="store_true", help="Dump human-readable text tree representation.")
 
     args = parser.parse_args()
@@ -40,34 +40,34 @@ def main():
     tokenizer = T5TokenizerFast.from_pretrained(args.tokenizer)
     logger.info(f"Tokenizer loaded in {time.time() - start_time:.2f}s")
     
-    # 1. AST Paths Generation
-    logger.info("Initializing AST Builder...")
-    ast_output_npz = output_dir / f"{args.prefix}_ast_paths.npz"
-    ast_error_log = output_dir / f"{args.prefix}_ast_errors.jsonl"
+    # 1. CPP Paths Generation
+    logger.info("Initializing CPP Builder...")
+    cpp_output_npz = output_dir / f"{args.prefix}_cpp_paths.npz"
+    cpp_error_log = output_dir / f"{args.prefix}_cpp_errors.jsonl"
     
-    ast_builder = ASTPathsDatasetBuilderASTOnly(
+    cpp_builder = CPPPathsDatasetBuilderCPPOnly(
         tokenizer=tokenizer,
         max_depth=args.max_depth,
         max_length=args.max_length
     )
     
-    logger.info("Building AST Paths...")
-    ast_stats = ast_builder.build_and_save(input_path, ast_output_npz, ast_error_log)
-    logger.info(f"AST Paths Done: {ast_stats['num_ok']}/{ast_stats['num_records']} successful.")
+    logger.info("Building CPP Paths...")
+    cpp_stats = cpp_builder.build_and_save(input_path, cpp_output_npz, cpp_error_log)
+    logger.info(f"CPP Paths Done: {cpp_stats['num_ok']}/{cpp_stats['num_records']} successful.")
     
-    # 2. DFG Links Generation
-    logger.info("Initializing DFG Links Builder...")
-    dfg_output_npz = output_dir / f"{args.prefix}_dfg_links.npz"
-    dfg_error_log = output_dir / f"{args.prefix}_dfg_errors.jsonl"
+    # 2. LDP Links Generation
+    logger.info("Initializing LDP Links Builder...")
+    ldp_output_npz = output_dir / f"{args.prefix}_ldp_links.npz"
+    ldp_error_log = output_dir / f"{args.prefix}_ldp_errors.jsonl"
     
-    dfg_builder = DFGLinksDatasetBuilderT5(
+    ldp_builder = LDPLinksDatasetBuilderT5(
         tokenizer=tokenizer,
         max_length=args.max_length,
     )
     
-    logger.info("Building DFG Links...")
-    dfg_stats = dfg_builder.build_and_save(input_path, dfg_output_npz, dfg_error_log)
-    logger.info(f"DFG Links Done: {dfg_stats['num_ok']}/{dfg_stats['num_records']} successful.")
+    logger.info("Building LDP Links...")
+    ldp_stats = ldp_builder.build_and_save(input_path, ldp_output_npz, ldp_error_log)
+    logger.info(f"LDP Links Done: {ldp_stats['num_ok']}/{ldp_stats['num_records']} successful.")
     
     # 3. Text Tree Dump (Optional)
     if args.dump_text_tree:

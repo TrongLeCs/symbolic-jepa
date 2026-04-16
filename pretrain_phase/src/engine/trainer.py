@@ -29,7 +29,7 @@ class Trainer:
 
         if cfg.use_wandb:
             wandb.init(
-                project=os.environ.get("WANDB_PROJECT", "Logic-JEPA-Pretrain"),
+                project=os.environ.get("WANDB_PROJECT", "pretrain-phase"),
                 name=os.environ.get("WANDB_NAME", "Logic-JEPA-Run"),
                 config=vars(self.cfg),
             )

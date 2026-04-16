@@ -7,18 +7,18 @@ from typing import Dict, Any, List, Tuple, Optional
 
 from transformers import T5TokenizerFast
 
-# AST builder that aligns FOL tokens -> T5 subword pieces (1:1 with decoder states)
-from parser.ast_paths_api import (
+# CPP builder that aligns FOL tokens -> T5 subword pieces (1:1 with decoder states)
+from parser.cpp_paths_api import (
     DEFAULT_TYPE_VOCAB,
-    build_ast_paths_tokenlevel,
+    build_cpp_paths_tokenlevel,
 )
 
 
-class ASTPathsDatasetBuilderASTOnly:
+class CPPPathsDatasetBuilderCPPOnly:
     """
-    Build a dataset where AST Path supervision is at the T5 *piece level*,
-    aligned 1:1 with decoder hidden states (no node pooling). Only AST Path
-    is produced; DFG is intentionally omitted.
+    Build a dataset where CPP Path supervision is at the T5 *piece level*,
+    aligned 1:1 with decoder hidden states (no node pooling). Only CPP Path
+    is produced; LDP is intentionally omitted.
 
     Input JSON must be a list of records with fields:
       - topic: int
@@ -26,9 +26,9 @@ class ASTPathsDatasetBuilderASTOnly:
       - fol:   str (required)
 
     For each record:
-      1) Parse FOL and compute AST paths at piece-level via build_ast_paths_tokenlevel.
+      1) Parse FOL and compute CPP paths at piece-level via build_cpp_paths_tokenlevel.
       2) Create labels (decoder targets) from the tokenizer pieces; optionally append EOS.
-      3) Convert piece-level AST paths to Lm1 length used in teacher forcing
+      3) Convert piece-level CPP paths to Lm1 length used in teacher forcing
          (Lm1 = L_out - 1, with L_out = len(labels)).
 
     Saved .npz as object arrays to accommodate variable lengths:
@@ -37,7 +37,7 @@ class ASTPathsDatasetBuilderASTOnly:
       - fol_texts: (N,) object[str]
       - fol_tokens: (N,) object[list[str]]          # FOL tokens (not subwords)
       - labels: (N,) object[np.ndarray (L_out,)]    # piece-level + optional EOS
-      - ast_paths: (N,) object[np.ndarray (Lm1, D)] # piece-level AST paths after Lm1 cut
+      - cpp_paths: (N,) object[np.ndarray (Lm1, D)] # piece-level CPP paths after Lm1 cut
       - piece_ids: (N,) object[list[int]]           # tokenizer piece ids (no EOS)
       - piece2tok: (N,) object[list[int]]           # mapping each piece -> FOL token idx
       - offsets:  (N,) object[list[Tuple[int,int]]] # offsets in text_norm
@@ -75,8 +75,8 @@ class ASTPathsDatasetBuilderASTOnly:
         if not fol:
             raise ValueError(f"FOL rỗng cho topic={topic_id}")
 
-        # 1) Build piece-level AST paths & alignment (no specials added inside)
-        out = build_ast_paths_tokenlevel(
+        # 1) Build piece-level CPP paths & alignment (no specials added inside)
+        out = build_cpp_paths_tokenlevel(
             expr=fol,
             tokenizer=self.tokenizer,
             max_length=self.max_length,
@@ -90,7 +90,7 @@ class ASTPathsDatasetBuilderASTOnly:
         piece_tokens: List[str] = self.tokenizer.convert_ids_to_tokens(input_ids_piece)
         offsets: List[Tuple[int, int]] = out["offsets"]
         piece2tok: List[int] = out["piece2fol"]
-        ast_paths_piece: np.ndarray = out["ast_paths_t5"]  # shape (1, L_piece, D)
+        cpp_paths_piece: np.ndarray = out["cpp_paths_t5"]  # shape (1, L_piece, D)
         L_piece = len(input_ids_piece)
 
         # 2) Labels (decoder targets): no EOS appended
@@ -98,14 +98,14 @@ class ASTPathsDatasetBuilderASTOnly:
         L_out = int(labels.shape[0])
         Lm1 = L_out - 1
 
-        # 3) Cut AST to Lm1 (teacher forcing length)
+        # 3) Cut CPP to Lm1 (teacher forcing length)
         #    Lm1 == L_piece - 1, drop the last row
-        ast_piece_lm1: np.ndarray
-        if ast_paths_piece.shape[1] != (Lm1 + 1):
+        cpp_piece_lm1: np.ndarray
+        if cpp_paths_piece.shape[1] != (Lm1 + 1):
             raise RuntimeError(
-                f"Shape mismatch: ast_paths L={ast_paths_piece.shape[1]} vs Lm1+1={Lm1+1} (expected L=Lm1+1)"
+                f"Shape mismatch: cpp_paths L={cpp_paths_piece.shape[1]} vs Lm1+1={Lm1+1} (expected L=Lm1+1)"
             )
-        ast_piece_lm1 = ast_paths_piece[0, :Lm1]
+        cpp_piece_lm1 = cpp_paths_piece[0, :Lm1]
 
         return {
             "topic_id": topic_id,
@@ -113,7 +113,7 @@ class ASTPathsDatasetBuilderASTOnly:
             "fol_text": fol,
             "fol_tokens": fol_tokens,
             "labels": labels,  # (L_out,)
-            "ast_paths": ast_piece_lm1.astype(np.int64, copy=False),  # (Lm1, D)
+            "cpp_paths": cpp_piece_lm1.astype(np.int64, copy=False),  # (Lm1, D)
             "piece_ids": input_ids_piece,  # no EOS
             "piece_tokens": piece_tokens,
             "piece2tok": piece2tok,
@@ -139,7 +139,7 @@ class ASTPathsDatasetBuilderASTOnly:
         fol_texts: List[str] = []
         fol_tokens_list: List[List[str]] = []
         labels_list: List[np.ndarray] = []
-        ast_list: List[np.ndarray] = []
+        cpp_list: List[np.ndarray] = []
         piece_ids_list: List[List[int]] = []
         piece2tok_list: List[List[int]] = []
         offsets_list: List[List[Tuple[int, int]]] = []
@@ -155,7 +155,7 @@ class ASTPathsDatasetBuilderASTOnly:
                     fol_texts.append(obj["fol_text"])
                     fol_tokens_list.append(obj["fol_tokens"])
                     labels_list.append(obj["labels"])
-                    ast_list.append(obj["ast_paths"])
+                    cpp_list.append(obj["cpp_paths"])
                     piece_ids_list.append(obj["piece_ids"])
                     piece2tok_list.append(obj["piece2tok"])
                     offsets_list.append(obj["offsets"])
@@ -170,8 +170,8 @@ class ASTPathsDatasetBuilderASTOnly:
                     txt_f.write(
                         f"labels (L_out={len(obj['labels'])}): {obj['labels'].tolist()}\n"
                     )
-                    txt_f.write(f"ast_paths shape: {obj['ast_paths'].shape}\n")
-                    txt_f.write(f"ast_paths:\n{obj['ast_paths']}\n")
+                    txt_f.write(f"cpp_paths shape: {obj['cpp_paths'].shape}\n")
+                    txt_f.write(f"cpp_paths:\n{obj['cpp_paths']}\n")
                     txt_f.write(f"piece2tok: {obj['piece2tok']}\n")
                     txt_f.write(f"offsets: {obj['offsets']}\n\n")
 
@@ -192,7 +192,7 @@ class ASTPathsDatasetBuilderASTOnly:
             fol_texts=np.asarray(fol_texts, dtype=object),
             fol_tokens=np.asarray(fol_tokens_list, dtype=object),
             labels=np.asarray(labels_list, dtype=object),
-            ast_paths=np.asarray(ast_list, dtype=object),
+            cpp_paths=np.asarray(cpp_list, dtype=object),
             # meta
             max_depth=np.int64(self.max_depth),
             type_vocab_keys=np.asarray(list(self.type_vocab.keys()), dtype=object),
@@ -223,19 +223,19 @@ class ASTPathsDatasetBuilderASTOnly:
 # ---------- CLI ----------
 def main():
     parser = argparse.ArgumentParser(
-        description="Build tokenizer-level AST dataset (.npz) from JSON for StructCoder (no pooling)"
+        description="Build tokenizer-level CPP dataset (.npz) from JSON for StructCoder (no pooling)"
     )
     parser.add_argument("--input", type=str, default="data/samples.json")
-    parser.add_argument("--output", type=str, default="data/ast/samples_ast_paths.npz")
+    parser.add_argument("--output", type=str, default="data/samples_cpp_paths.npz")
     parser.add_argument(
         "--tokenizer",
         type=str,
         default="t5-base",
         help="Model name or directory of T5TokenizerFast",
     )
-    parser.add_argument("--max_depth", type=int, default=10, help="Max AST depth")
+    parser.add_argument("--max_depth", type=int, default=10, help="Max CPP depth")
     parser.add_argument("--max_length", type=int, default=256, help="Max length")
-    parser.add_argument("--causal", default=False, action="store_true", help="Enable causal masking for AST")
+    parser.add_argument("--causal", default=False, action="store_true", help="Enable causal masking for CPP")
     parser.add_argument("--no_eos", default=False, action="store_true", help="Do not append EOS to labels")
     parser.add_argument(
         "--error_log",
@@ -247,7 +247,7 @@ def main():
     
     tokenizer = T5TokenizerFast.from_pretrained(args.tokenizer)
 
-    builder = ASTPathsDatasetBuilderASTOnly(
+    builder = CPPPathsDatasetBuilderCPPOnly(
         tokenizer=tokenizer,
         max_depth=args.max_depth,
         max_length=args.max_length,

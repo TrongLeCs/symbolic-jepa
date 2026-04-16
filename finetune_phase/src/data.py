@@ -27,7 +27,7 @@ def load_raw_examples(
 
 
 def _to_example(ex: Dict[str, Any]) -> Dict[str, Any]:
-    """Convert a JSON record into a standard example, removing fields related to AST and DFG."""
+    """Convert a JSON record into a standard example, removing fields related to CPP and LDP."""
     nl = (ex.get("nl") or "").strip()  # Get NL sentence from JSON
     fol = (ex.get("fol") or "").strip()  # Get FOL formula from JSON
 
@@ -38,7 +38,7 @@ def _to_example(ex: Dict[str, Any]) -> Dict[str, Any]:
     if "topic" in ex:
         out["topic"] = ex["topic"]
 
-    # No parts related to AST and DFG in this example
+    # No parts related to CPP and LDP in this example
     return out
 
 
@@ -53,8 +53,8 @@ def _preprocess(
     tokenizer,
     source_max_length: int = 256,
     target_max_length: int = 256,
-    ast_map: Optional[Dict[int, Dict[str, Any]]] = None,
-    dfg_map: Optional[Dict[int, Dict[str, Any]]] = None,
+    cpp_map: Optional[Dict[int, Dict[str, Any]]] = None,
+    ldp_map: Optional[Dict[int, Dict[str, Any]]] = None,
 ) -> Dict[str, Any]:
     nl_list = batch.get("NL", [])
     fol_list = batch.get("FOL", [])
@@ -80,30 +80,34 @@ def _preprocess(
     # DO NOT set -100 here; let the collator handle it
     src["labels"] = tgt["input_ids"]  # list of lists, variable length
 
-    # 3) attach raw supervision for AST/DFG (NO padding/cropping)
-    if ast_map is None or dfg_map is None:
-        raise ValueError("ast_map and dfg_map are required in this pipeline.")
+    # 3) attach raw supervision for CPP/LDP (NO padding/cropping)
+    if cpp_map is None or ldp_map is None:
+        raise ValueError("cpp_map and ldp_map are required in this pipeline.")
 
-    ast_paths_list, dfg_links_list = [], []
+    cpp_paths_list, ldp_links_list = [], []
     for i in range(bsz):
         tid = int(batch["topic"][i]) if has_topic else None
-        sup_ast = ast_map[tid]
-        sup_dfg = dfg_map[tid]
+        sup_cpp = cpp_map[tid]
+        sup_ldp = ldp_map[tid]
 
-        ast_paths = sup_ast["ast_paths"]
-        dfg_mat = sup_dfg["dfg_links"]
+        # Normalization: handle both 'cpp_paths'/'ldp_links' and legacy 'ast_paths'/'dfg_links'
+        cpp_paths_key = "cpp_paths" if "cpp_paths" in sup_cpp else "ast_paths"
+        ldp_links_key = "ldp_links" if "ldp_links" in sup_ldp else "dfg_links"
+
+        cpp_paths = sup_cpp[cpp_paths_key]
+        ldp_links = sup_ldp[ldp_links_key]
 
         # ensure it is a list of lists (variable length)
-        if isinstance(ast_paths, np.ndarray):
-            ast_paths = ast_paths.tolist()
-        if isinstance(dfg_mat, np.ndarray):
-            dfg_mat = dfg_mat.tolist()
+        if isinstance(cpp_paths, np.ndarray):
+            cpp_paths = cpp_paths.tolist()
+        if isinstance(ldp_links, np.ndarray):
+            ldp_links = ldp_links.tolist()
 
-        ast_paths_list.append(ast_paths)  # (Lm1_i, D_i) raw
-        dfg_links_list.append(dfg_mat)  # (Lm1_i, Lm1_i) raw
+        cpp_paths_list.append(cpp_paths)  # (Lm1_i, D_i) raw
+        ldp_links_list.append(ldp_links)  # (Lm1_i, Lm1_i) raw
 
-    src["ast_paths"] = ast_paths_list
-    src["dfg_links"] = dfg_links_list
+    src["cpp_paths"] = cpp_paths_list
+    src["ldp_links"] = ldp_links_list
 
     return src
 
@@ -112,8 +116,8 @@ def make_preprocess_func(
     tokenizer,
     source_max_length: int = 256,
     target_max_length: int = 256,
-    ast_map: Optional[Dict[int, Dict[str, Any]]] = None,
-    dfg_map: Optional[Dict[int, Dict[str, Any]]] = None,
+    cpp_map: Optional[Dict[int, Dict[str, Any]]] = None,
+    ldp_map: Optional[Dict[int, Dict[str, Any]]] = None,
 ) -> Callable[[Dict[str, Any]], Dict[str, Any]]:
     """
     Returns a preprocess function (callable) for dataset.map(batched=True).
@@ -125,27 +129,29 @@ def make_preprocess_func(
             tokenizer=tokenizer,
             source_max_length=source_max_length,
             target_max_length=target_max_length,
-            ast_map=ast_map,
-            dfg_map=dfg_map,
+            cpp_map=cpp_map,
+            ldp_map=ldp_map,
         )
 
     return _fn
 
 
-def load_ast_npz(npz_path: Optional[str | Path]) -> Optional[Dict[int, Dict[str, Any]]]:
+def load_cpp_npz(npz_path: Optional[str | Path]) -> Optional[Dict[int, Dict[str, Any]]]:
     if not npz_path:
         return None
     p = Path(npz_path)
     if not p.exists():
-        print(f"[WARN] AST npz not found: {p}")
+        print(f"[WARN] CPP npz not found: {p}")
         return None
 
     data = np.load(p, allow_pickle=True)
 
-    # Required fields according to the .npz file you saved
+    # Required fields according to the .npz file (normalize legacy names)
     topic_ids = list(map(int, data["topic_ids"].tolist()))
     labels_list = data["labels"].tolist()  # each element: np.ndarray shape (L_out,)
-    ast_list = data["ast_paths"].tolist()  # each element: np.ndarray shape (Lm1, D)
+    
+    cpp_key = "cpp_paths" if "cpp_paths" in data else "ast_paths"
+    cpp_list = data[cpp_key].tolist()  # each element: np.ndarray shape (Lm1, D)
 
     # Meta (may or may not exist)
     max_depth = int(data.get("max_depth", np.array(10, dtype=np.int64)))
@@ -155,51 +161,53 @@ def load_ast_npz(npz_path: Optional[str | Path]) -> Optional[Dict[int, Dict[str,
     n_bad = 0
     for i, tid in enumerate(topic_ids):
         labels = labels_list[i]
-        astp = ast_list[i]
+        cpp_p = cpp_list[i]
 
-        # Sanity-check: following Approach A, ast_paths have shape (Lm1, D) with Lm1 = L_out - 1
+        # Sanity-check: follow Approach A, cpp_paths have shape (Lm1, D) with Lm1 = L_out - 1
         L_out = int(labels.shape[0])
         Lm1_expected = L_out - 1
-        Lm1_actual = int(astp.shape[0])
+        Lm1_actual = int(cpp_p.shape[0])
         if Lm1_actual != Lm1_expected:
             n_bad += 1
             print(
-                f"[WARN] topic_id={tid}: Lm1(ast)={Lm1_actual} != L_out-1={Lm1_expected}"
+                f"[WARN] topic_id={tid}: Lm1(cpp)={Lm1_actual} != L_out-1={Lm1_expected}"
             )
 
         out[tid] = {
             "labels": labels,  # (L_out,)
-            "ast_paths": astp,  # (Lm1, D) — NO BOS/EOS
+            "cpp_paths": cpp_p,  # (Lm1, D) — NO BOS/EOS
         }
 
     print(
-        f"Loaded AST supervision for {len(out)} samples (max_depth={max_depth})."
+        f"Loaded CPP supervision for {len(out)} samples (max_depth={max_depth})."
         + (f" Mismatched: {n_bad}" if n_bad else "")
     )
 
     return out
 
 
-# ---------- Load DFG supervision from saved .npz ----------
-# Compatible with DFGLinksDatasetBuilderT5 (object arrays)
+# ---------- Load LDP supervision from saved .npz ----------
+# Compatible with LDPLinksDatasetBuilderT5 (object arrays)
 
 
-def load_dfg_npz(npz_path: Optional[str | Path]) -> Optional[Dict[int, Dict[str, Any]]]:
+def load_ldp_npz(npz_path: Optional[str | Path]) -> Optional[Dict[int, Dict[str, Any]]]:
     if not npz_path:
         return None
     p = Path(npz_path)
     if not p.exists():
-        print(f"[WARN] DFG npz not found: {p}")
+        print(f"[WARN] LDP npz not found: {p}")
         return None
     data = np.load(p, allow_pickle=True)
     topic_ids = list(map(int, data["topic_ids"].tolist()))
-    dfg_list = data["dfg_links"].tolist()  # each: (L, L) with -1 mask
+    
+    ldp_key = "ldp_links" if "ldp_links" in data else "dfg_links"
+    ldp_list = data[ldp_key].tolist()  # each: (L, L) with -1 mask
 
     out: Dict[int, Dict[str, Any]] = {}
     for i, tid in enumerate(topic_ids):
         out[tid] = {
-            "dfg_links": dfg_list[i],
+            "ldp_links": ldp_list[i],
         }
 
-    print(f"Loaded DFG supervision for {len(out)} samples.")
+    print(f"Loaded LDP supervision for {len(out)} samples.")
     return out

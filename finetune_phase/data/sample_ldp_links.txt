@@ -1,4 +1,4 @@
-# DFG Links (T5 level) dump for sample_dfg_links.npz
+# LDP Links (T5 level) dump for sample_ldp_links.npz
 # Total input records: 1
 # --------------------------------------------
 
@@ -9,8 +9,8 @@ text_norm: ( FORALL x ( person ( x ) AND can_write_code ( x ) IMPLIES program ( 
 tokens (37): ['▁(', '▁FOR', 'ALL', '▁', 'x', '▁(', '▁person', '▁(', '▁', 'x', '▁', ')', '▁AND', '▁can', '_', 'write', '_', 'code', '▁(', '▁', 'x', '▁', ')', '▁', 'IMP', 'L', 'IES', '▁program', '▁(', '▁', 'x', '▁', ')', '▁', ')', '▁', ')']
 types  (37): ['ignored', 'quantifier', 'quantifier', 'other', 'variable', 'ignored', 'predicate', 'ignored', 'other', 'variable', 'other', 'ignored', 'operator', 'predicate', 'predicate', 'predicate', 'predicate', 'predicate', 'ignored', 'other', 'variable', 'other', 'ignored', 'other', 'operator', 'operator', 'operator', 'predicate', 'ignored', 'other', 'variable', 'other', 'ignored', 'other', 'ignored', 'other', 'ignored']
 token_predicate_id_T5 (LOCAL, len=37): [-1, -1, -1, -1, -1, -1, 0, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1]
-dfg_links shape: (37, 37)
-dfg_links (row-wise):
+ldp_links shape: (37, 37)
+ldp_links (row-wise):
       0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36
    0: -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
    1: -1  0  0 -1  0 -1  0 -1 -1  1 -1 -1  0  0  0  0  0  0 -1 -1  1 -1 -1 -1  0  0  0  0 -1 -1  1 -1 -1 -1 -1 -1 -1

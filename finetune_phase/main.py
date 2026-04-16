@@ -45,10 +45,10 @@ def parse_args():
             "encoder/saved_models/t5_target_encoder.pth",
         ),
     )
-    p.add_argument("--ast_npz_train", default="data/ast/train_ast_paths.npz")
-    p.add_argument("--ast_npz_eval", default="data/ast/val_ast_paths.npz")
-    p.add_argument("--dfg_npz_train", default="data/dfg/train_dfg_links.npz")
-    p.add_argument("--dfg_npz_eval", default="data/dfg/val_dfg_links.npz")
+    p.add_argument("--cpp_npz_train", default="data/sample_cpp_paths.npz")
+    p.add_argument("--cpp_npz_eval", default="data/sample_cpp_paths.npz")
+    p.add_argument("--ldp_npz_train", default="data/sample_ldp_links.npz")
+    p.add_argument("--ldp_npz_eval", default="data/sample_ldp_links.npz")
     p.add_argument(
         "--output_dir",
         default=_artifact_default("finetune_model", "decoder/finetune_model"),
@@ -73,14 +73,14 @@ def parse_args():
 
     # struct supervision
     p.add_argument("--enable_struct", type=int, default=1)
-    p.add_argument("--enable_dfg", type=int, default=1)
-    p.add_argument("--enable_ast", type=int, default=1)
+    p.add_argument("--enable_ldp", type=int, default=1)
+    p.add_argument("--enable_cpp", type=int, default=1)
     p.add_argument("--num_node_types", type=int, default=len(DEFAULT_TYPE_VOCAB))
-    p.add_argument("--max_ast_depth", type=int, default=10)
-    p.add_argument("--dfg_bits", type=int, default=16)
-    p.add_argument("--ast_path_bits", type=int, default=128)
-    p.add_argument("--alpha_dfg", type=float, default=0.05) # 0.05
-    p.add_argument("--alpha_ast", type=float, default=0.1) # 0.1
+    p.add_argument("--max_cpp_depth", type=int, default=10)
+    p.add_argument("--ldp_bits", type=int, default=16)
+    p.add_argument("--cpp_path_bits", type=int, default=128)
+    p.add_argument("--alpha_ldp", type=float, default=0.05) # 0.05
+    p.add_argument("--alpha_cpp", type=float, default=0.1) # 0.1
     p.add_argument("--device", default="cuda", choices=["cpu", "cuda", "mps"])
 
     args = p.parse_args()
@@ -90,10 +90,10 @@ def parse_args():
         train_json=args.train_json,
         eval_json=args.eval_json,
         pretrained_encoder_path=args.pretrained_encoder_path,
-        ast_npz_train=args.ast_npz_train,
-        ast_npz_eval=args.ast_npz_eval,
-        dfg_npz_train=args.dfg_npz_train,
-        dfg_npz_eval=args.dfg_npz_eval,
+        cpp_npz_train=args.cpp_npz_train,
+        cpp_npz_eval=args.cpp_npz_eval,
+        ldp_npz_train=args.ldp_npz_train,
+        ldp_npz_eval=args.ldp_npz_eval,
         output_dir=args.output_dir,
     )
 
@@ -116,14 +116,14 @@ def parse_args():
 
     struct = SimpleNamespace(
         enable=bool(args.enable_struct),
-        enable_dfg=bool(args.enable_dfg),
-        enable_ast=bool(args.enable_ast),
+        enable_ldp=bool(args.enable_ldp),
+        enable_cpp=bool(args.enable_cpp),
         num_node_types=args.num_node_types,
-        max_ast_depth=args.max_ast_depth,
-        dfg_bits=args.dfg_bits,
-        ast_path_bits=args.ast_path_bits,
-        alpha_dfg=args.alpha_dfg,
-        alpha_ast=args.alpha_ast,
+        max_cpp_depth=args.max_cpp_depth,
+        ldp_bits=args.ldp_bits,
+        cpp_path_bits=args.cpp_path_bits,
+        alpha_ldp=args.alpha_ldp,
+        alpha_cpp=args.alpha_cpp,
     )
 
     return paths, cfg, struct

@@ -23,19 +23,19 @@ export LOGIC_JEPA_ARTIFACTS_DIR="$ARTIFACTS_DIR"
 echo "Artifacts dir: $LOGIC_JEPA_ARTIFACTS_DIR"
 
 # ==========================================
-# STEP 1: ENCODER
+# STEP 1: PRETRAIN
 # ==========================================
 echo "[1/4] Activating logic_jepa environment and running Encoder..."
 # Changed to absolute path
 conda activate /workspace/envs/logic_jepa
-cd "$BASE_DIR/Encoder-Logic-JEPA"
+cd "$BASE_DIR/pretrain_phase"
 python main.py
 
 # ==========================================
-# STEP 2: DECODER (MAIN)
+# STEP 2: FINETUNE (MAIN)
 # ==========================================
 echo "[2/4] Running Decoder main.py..."
-cd "$BASE_DIR/Decoder-Logic-JEPA"
+cd "$BASE_DIR/finetune_phase"
 python main.py
 
 # ==========================================

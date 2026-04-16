@@ -6,8 +6,8 @@ import os
 
 from transformers import Trainer, TrainingArguments, EarlyStoppingCallback
 from src.data import (
-    load_ast_npz,
-    load_dfg_npz,
+    load_cpp_npz,
+    load_ldp_npz,
     load_raw_examples,
     make_datasets,
     make_preprocess_func,
@@ -22,7 +22,7 @@ import wandb
 def run_training(paths, cfg, struct) -> None:
 
     if cfg.wandb_run_name:
-        wandb.init(project="Decoder-logic-jepa", name=cfg.wandb_run_name)
+        wandb.init(project="finetune-phase", name=cfg.wandb_run_name)
 
     # 1) Load raw data
     train_ex, eval_ex = load_raw_examples(paths.train_json, paths.eval_json)
@@ -35,32 +35,32 @@ def run_training(paths, cfg, struct) -> None:
         print("Using T5WithStructHeads model with structural supervision.")
         model = T5WithStructHeads.from_t5_pretrained(
             cfg.model_name,  # e.g., "t5-base"
-            enable_dfg=bool(getattr(struct, "enable_dfg", True)),
-            enable_ast=bool(getattr(struct, "enable_ast", True)),
-            alpha_dfg=struct.alpha_dfg,
-            alpha_ast=struct.alpha_ast,
+            enable_ldp=bool(getattr(struct, "enable_ldp", True)),
+            enable_cpp=bool(getattr(struct, "enable_cpp", True)),
+            alpha_ldp=struct.alpha_ldp,
+            alpha_cpp=struct.alpha_cpp,
             num_node_types=struct.num_node_types,
-            max_ast_depth=struct.max_ast_depth,
-            dfg_bits=struct.dfg_bits,
-            ast_path_bits=struct.ast_path_bits,
+            max_cpp_depth=struct.max_cpp_depth,
+            ldp_bits=struct.ldp_bits,
+            cpp_path_bits=struct.cpp_path_bits,
             wandb_run_name = cfg.wandb_run_name
         )
 
-        if not bool(getattr(struct, "enable_dfg", True)):
-            model.alpha_dfg = 0.0
+        if not bool(getattr(struct, "enable_ldp", True)):
+            model.alpha_ldp = 0.0
             for p in [
-                *model.proj_dfg.parameters(),
-                *model.dfg_weight1.parameters(),
-                *model.dfg_weight2.parameters(),
-                *model.dfg_b1.parameters(),
-                *model.dfg_b2.parameters(),
+                *model.proj_ldp.parameters(),
+                *model.ldp_weight1.parameters(),
+                *model.ldp_weight2.parameters(),
+                *model.ldp_b1.parameters(),
+                *model.ldp_b2.parameters(),
             ]:
                 p.requires_grad = False
-            model.dfg_b3.requires_grad = False
+            model.ldp_b3.requires_grad = False
 
-        if not bool(getattr(struct, "enable_ast", True)):
-            model.alpha_ast = 0.0
-            for p in [*model.proj_ast.parameters(), *model.ast_path_head.parameters()]:
+        if not bool(getattr(struct, "enable_cpp", True)):
+            model.alpha_cpp = 0.0
+            for p in [*model.proj_cpp.parameters(), *model.cpp_path_head.parameters()]:
                 p.requires_grad = False
     else:
         from transformers import T5ForConditionalGeneration
@@ -72,24 +72,24 @@ def run_training(paths, cfg, struct) -> None:
     # 3) Datasets + preprocessing (per split supervision)
     train_ds, eval_ds = make_datasets(train_ex, eval_ex)
 
-    ast_train = load_ast_npz(getattr(paths, "ast_npz_train", None))
-    ast_eval = load_ast_npz(getattr(paths, "ast_npz_eval", None))
-    dfg_train = load_dfg_npz(getattr(paths, "dfg_npz_train", None))
-    dfg_eval = load_dfg_npz(getattr(paths, "dfg_npz_eval", None))
+    cpp_train = load_cpp_npz(getattr(paths, "cpp_npz_train", None))
+    cpp_eval = load_cpp_npz(getattr(paths, "cpp_npz_eval", None))
+    ldp_train = load_ldp_npz(getattr(paths, "ldp_npz_train", None))
+    ldp_eval = load_ldp_npz(getattr(paths, "ldp_npz_eval", None))
 
     preprocess_train = make_preprocess_func(
         tokenizer,
         source_max_length=cfg.source_max_len,
         target_max_length=cfg.target_max_len,
-        ast_map=ast_train,
-        dfg_map=dfg_train,
+        cpp_map=cpp_train,
+        ldp_map=ldp_train,
     )
     preprocess_eval = make_preprocess_func(
         tokenizer,
         source_max_length=cfg.source_max_len,
         target_max_length=cfg.target_max_len,
-        ast_map=ast_eval,
-        dfg_map=dfg_eval,
+        cpp_map=cpp_eval,
+        ldp_map=ldp_eval,
     )
 
     train_ds = train_ds.map(preprocess_train, batched=True)
