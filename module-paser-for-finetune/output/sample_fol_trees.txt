@@ -1,0 +1,16 @@
+# FOL parse dump for sample.json
+# Total input records: 1
+# --------------------------------------------
+
+=== Record 0 ===
+topic: 1
+nl: A person is considered a programmer if they can write computer code
+fol: (FORALL x (person(x) AND can_write_code(x) IMPLIES program(x)))
+parsed_tree:
+└── FORALL x
+    ├── IMPLIES
+    │   ├── AND
+    │   │   └── person(x)
+    │   │   └── can_write_code(x)
+    │   └── program(x)
+

@@ -1,0 +1,7 @@
+[
+    {
+        "topic": 1,
+        "nl": "A person is considered a programmer if they can write computer code",
+        "fol": "(FORALL x (person(x) AND can_write_code(x) IMPLIES program(x)))"
+    }
+]

@@ -34,8 +34,8 @@ def parse_args():
     p = argparse.ArgumentParser()
 
     # ================= Data / IO =================
-    p.add_argument("--train_path", default="./data_custom/train_dataset.jsonl")
-    p.add_argument("--val_path", default="./data_custom/val_dataset.jsonl")
+    p.add_argument("--train_path", default="./data/train_dataset.jsonl")
+    p.add_argument("--val_path", default="./data/val_dataset.jsonl")
     p.add_argument("--data_dir", default="saved_data")
     p.add_argument(
         "--model_dir",

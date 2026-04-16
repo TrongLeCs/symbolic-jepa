@@ -54,16 +54,6 @@ def parse_args():
         default=_artifact_default("finetune_model", "decoder/finetune_model"),
     )
 
-    # data / io
-    # p.add_argument("--train_json", default="data_malls/malls_train.json")
-    # p.add_argument("--eval_json", default="data_malls/malls_val.json")
-    # p.add_argument("--pretrained_encoder_path", default="model-pretrain/t5_target_encoder_malls.pth")
-    # p.add_argument("--ast_npz_train", default="data_malls/ast/malls_train_ast_paths.npz")
-    # p.add_argument("--ast_npz_eval", default="data_malls/ast/malls_val_ast_paths.npz")
-    # p.add_argument("--dfg_npz_train", default="data_malls/dfg/malls_train_dfg_links.npz")
-    # p.add_argument("--dfg_npz_eval", default="data_malls/dfg/malls_val_dfg_links.npz")
-    # p.add_argument("--output_dir", default="finetune_model_paralogic_jepa_malls_unfreeze")
-
     # logging
     p.add_argument("--wandb_run_name", default="Logic-JEPA-0310")
 
