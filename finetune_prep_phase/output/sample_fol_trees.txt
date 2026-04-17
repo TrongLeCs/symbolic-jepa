@@ -1,5 +1,5 @@
 # FOL parse dump for sample.json
-# Total input records: 1
+# Total input records: 2
 # --------------------------------------------
 
 === Record 0 ===
@@ -13,4 +13,17 @@ parsed_tree:
     │   │   └── person(x)
     │   │   └── can_write_code(x)
     │   └── program(x)
+
+=== Record 1 ===
+topic: 2
+nl: All students make mistakes
+fol: (FORALL x (student(x) IMPLIES EXISTS y (mistake(y) AND makes(x, y))))
+parsed_tree:
+└── FORALL x
+    ├── IMPLIES
+    │   └── student(x)
+    │   └── EXISTS y
+    │   │   ├── AND
+    │   │   │   └── mistake(y)
+    │   │   │   └── makes(x,y)
 

@@ -3,5 +3,10 @@
         "topic": 1,
         "nl": "A person is considered a programmer if they can write computer code",
         "fol": "(FORALL x (person(x) AND can_write_code(x) IMPLIES program(x)))"
+    },
+    {
+        "topic": 2,
+        "nl": "All students make mistakes",
+        "fol": "(FORALL x (student(x) IMPLIES EXISTS y (mistake(y) AND makes(x, y))))"
     }
 ]
