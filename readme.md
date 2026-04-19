@@ -132,10 +132,9 @@ Each split contains paired natural language (NL) and first-order logic (FOL) rep
     "3 sentences": 144,
     "4 or more sentences": 292,
     "total NL sentences": 2842,
-    "total FOL sentences": 2809
   }
 }
----
+```
 
 ## 📥 Download Pre-processed Datasets
 
@@ -148,15 +147,17 @@ Pre-processed datasets for both pretraining and fine-tuning phases are available
 ## 📊 Data Specifications
 
 ### 1. Pretraining Data (`pretrain_phase`)
+
 The pretraining phase uses a rich JSONL format that includes path-level structural information for both NL and FOL.
 
-*   **Format**: `.jsonl`
-*   **Key Fields**:
-    *   `topic`: A unique ID for the logic sample.
-    *   `ast_fol`: Contains the FOL expression, its tokens, and **structural paths** (type paths and value paths) representing the logic tree hierarchy.
-    *   `ast_nl`: Similar to `ast_fol`, but for the Natural Language sentence, aligning linguistic components with logic tree nodes.
+- **Format**: `.jsonl`
+- **Key Fields**:
+  - `topic`: A unique ID for the logic sample.
+  - `ast_fol`: Contains the FOL expression, its tokens, and **structural paths** (type paths and value paths) representing the logic tree hierarchy.
+  - `ast_nl`: Similar to `ast_fol`, but for the Natural Language sentence, aligning linguistic components with logic tree nodes.
 
-*   **Preview Case**:
+- **Preview Case**:
+
     ```json
     {
       "topic": 1,
@@ -169,26 +170,33 @@ The pretraining phase uses a rich JSONL format that includes path-level structur
       "ast_nl": [...]
     }
     ```
+
     *For more details on data formats and complex examples, please refer to the `data/` or `output/` directories in each phase, such as `pretrain_phase/data/`.*
 
 ### 2. Fine-tuning Structural Supervision (`.npz`)
+
 The `finetune_prep_phase` generates structural labels stored in Compressed NumPy files (`.npz`), which provide the necessary conditional structural awareness for the decoders.
 
 #### **Compositional Path Prediction (CPP)** (`*_cpp_paths.npz`)
+
 This leverages the **Structure-Aware Node & Path Encoder (SANE)** representation to encode the hierarchical path from root to leaf for every token in the FOL formula.
+
 - `topic_ids`: (N,) - Mapping to the main dataset.
 - `labels`: (N, L) - Target token IDs for the decoder.
 - `cpp_paths`: (N, L, Depth) - The structural "coordinate" of each token in the logic tree based on the SANE architecture.
 - `type_vocab_keys/vals`: Vocab mapping for structural node types (e.g., Predicate, Variable, Quantifier).
 
 #### **Logical Dependency Prediction (LDP)** (`*_ldp_links.npz`)
+
 This captures the logical dependencies and variable flow within the formula to enforce semantic constraints.
+
 - `ldp_links`: (N, L, L) - Adjacency matrix of logical dependencies (Logic Data Paths).
 - `ldp_edges`: (N, E, 2) - Explicit list of (source, destination) edges for variable binding (e.g. Predicate$\rightarrow$Argument edges).
 - `tokens`: (N, L) - Tokens aligned with the Tokenizer pieces.
 - `token_predicate_id`: (N, L) - Local IDs identifying tokens referring to specific logical predicates.
 
-*   **Preview Case (Input JSON)**:
+- **Preview Case (Input JSON)**:
+
     ```json
     [
       {
@@ -198,6 +206,7 @@ This captures the logical dependencies and variable flow within the formula to e
       }
     ]
     ```
+
     *For more details on how these records are paired with structural labels, check `finetune_phase/data/`.*
 
 ---
@@ -206,18 +215,20 @@ This captures the logical dependencies and variable flow within the formula to e
 
 Evaluation consists of three complementary dimensions:
 
-1.  **Well-formedness**: Validates if the generated FOL string is syntactically correct and parsable.
-2.  **Semantic Score**: Measures linguistic similarity between the generated and reference FOL using metrics like **BLEU** or **BERTScore**.
-3.  **Logic Score**: The most critical metric, assessing structural equivalence using FOL tree matching or SMT solvers to verify if the generated formula is logically identical to the ground truth.
+1. **Well-formedness**: Validates if the generated FOL string is syntactically correct and parsable.
+2. **Semantic Score**: Measures linguistic similarity between the generated and reference FOL using metrics like **BLEU** or **BERTScore**.
+3. **Logic Score**: The most critical metric, assessing structural equivalence using FOL tree matching or SMT solvers to verify if the generated formula is logically identical to the ground truth.
 
 ---
 
 ## 🚀 Getting Started
 
 ### 1. Environment Setup
-The project relies on two main Conda environments to separate training libraries from evaluation dependencies. 
+
+The project relies on two main Conda environments to separate training libraries from evaluation dependencies.
 
 Create and activate the environments (requires Python 3.10+):
+
 ```bash
 # 1. Training Environment
 conda create -n logic_jepa python=3.10
