@@ -1,6 +1,20 @@
-# PARA-LOGIC DATASET
+# Symbolic-JEPA: Where Symbolic AI Meets Joint-Embedding Predictive Architecture for NL–FOL Conversion
 
-## 📊 Dataset Statistics
+## 🏗 Repository Structure
+
+The project is organized into modular phases representing the training and evaluation lifecycle:
+
+- [ParaLogic-Dataset/](ParaLogic-Dataset/): The core data repository containing the structured data splits (`train.json`, `test.json`, `val.json`) used for training and evaluation.
+- [pretrain_phase/](pretrain_phase/): Stage 1 training using the JEPA architecture. Focuses on joint embedding of NL and FOL with a masking task and auxiliary structural losses.
+- [finetune_prep_phase/](finetune_prep_phase/): Data preparation for the fine-tuning stage. Parses FOL into trees and generates structural labels (**CPP** and **LDP**).
+- [finetune_phase/](finetune_phase/): Stage 2 training. Fine-tunes a T5 model with structural heads for NL-to-FOL translation using multi-task supervised learning.
+- [metric_eval/](metric_eval/): Comprehensive evaluation suite to assess translation quality across syntax, semantics, and logic.
+
+---
+
+## 📊 Para-Logic Dataset
+
+### 📊 Dataset Statistics
 
 This dataset is a paragraph-level corpus, where each sample corresponds to a short text segment containing one or more sentences.
 Samples are categorized by the number of sentences per paragraph (1, 2, 3, or 4+), and divided into train, validation, and test splits.
@@ -8,7 +22,7 @@ Each split contains paired natural language (NL) and first-order logic (FOL) rep
 
 ---
 
-## 🧩 Overall Summary
+### 🧩 Overall Summary
 
 <table>
   <thead>
@@ -121,23 +135,9 @@ Each split contains paired natural language (NL) and first-order logic (FOL) rep
     "total FOL sentences": 2809
   }
 }
-
-
----
-# Symbolic-JEPA: Where Symbolic AI Meets Joint-Embedding Predictive Architecture for NL–FOL Conversion
----
-## 🏗 Repository Structure
-
-The project is organized into modular phases representing the training and evaluation lifecycle:
-
-- [pretrain_phase/](pretrain_phase/): Stage 1 training using the JEPA architecture. Focuses on joint embedding of NL and FOL with a masking task and auxiliary structural losses.
-- [finetune_prep_phase/](finetune_prep_phase/): Data preparation for the fine-tuning stage. Parses FOL into trees and generates structural labels (**CPP** and **LDP**).
-- [finetune_phase/](finetune_phase/): Stage 2 training. Fine-tunes a T5 model with structural heads for NL-to-FOL translation using multi-task supervised learning.
-- [metric_eval/](metric_eval/): Comprehensive evaluation suite to assess translation quality across syntax, semantics, and logic.
-
 ---
 
-## 📦 Data Access
+## 📥 Download Pre-processed Datasets
 
 Pre-processed datasets for both pretraining and fine-tuning phases are available for download at the link below:
 
