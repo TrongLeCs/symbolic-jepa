@@ -101,20 +101,22 @@ Each split contains paired natural language (NL) and first-order logic (FOL) rep
 Figure 1 provides an overview of the CNF complexity distribution and its relationship with structural depth across the training, validation, and testing datasets.
 
 <p align="center">
-  <img src="ParaLogic-Dataset/images/train_joint_chart.pdf" width="32%" alt="Training Dataset" />
-  <img src="ParaLogic-Dataset/images/val_joint_chart.pdf" width="32%" alt="Validation Dataset" />
-  <img src="ParaLogic-Dataset/images/test_joint_chart.pdf" width="32%" alt="Testing Dataset" />
+  <img src="ParaLogic-Dataset/images/train_joint_chart.png" width="32%" alt="Training Dataset" />
+  <img src="ParaLogic-Dataset/images/val_joint_chart.png" width="32%" alt="Validation Dataset" />
+  <img src="ParaLogic-Dataset/images/test_joint_chart.png" width="32%" alt="Testing Dataset" />
   <br>
   <em>Figure 1: Visualization of Depth, Complexity, Level Distribution and Correlation statistics across datasets.</em>
 </p>
 
 Each dataset split corresponds to one of the visualizations above. Within each, four schematic components are presented: 
+
 1. **Bar charts** illustrating the CNF depth distributions.
 2. **Bar charts** illustrating the CNF complexity distributions.
 3. **Pie charts** showing the proportion of total instances across four difficulty levels.
 4. **Scatter plots** depicting the correlation between CNF complexity and structural depth.
 
 #### **Distribution & Complexity**
+
 All splits exhibit a **right-skewed pattern**, with most formulas containing **8-20 clauses**, indicating that simpler logical structures dominate. Based on quartile thresholds of overall complexity, CNF instances are categorized into four levels:
 
 | Difficulty Level | Mean Complexity Score | Proportion (%) |
@@ -124,7 +126,8 @@ All splits exhibit a **right-skewed pattern**, with most formulas containing **8
 | *Hard + Very Hard* | 6.4479 - 10.6203 | 45 - 48% |
 
 #### **Structural Correlation**
-CNF complexity and tree depth exhibit a **strong positive correlation** across all splits, with **Spearman coefficients (ρ)** between **0.917 and 0.927**. This suggests that deeper formulas generally have higher symbolic complexity, and the consistent trend across splits confirms the dataset’s reliability in modeling reasoning difficulty.
+
+CNF complexity and tree depth exhibit a strong positive correlation across all splits, with Spearman coefficients (ρ) between 0.917 and 0.927. This suggests that deeper formulas generally have higher symbolic complexity, and the consistent trend across splits confirms the dataset’s reliability in modeling reasoning difficulty.
 
 ---
 
