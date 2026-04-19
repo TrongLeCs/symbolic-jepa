@@ -96,6 +96,36 @@ Each split contains paired natural language (NL) and first-order logic (FOL) rep
 
 **We intentionally keep samples with a single sentence** to enable a curriculum learning strategy: models can be trained progressively — starting with 1-sentence examples, then moving to 2–3 sentence examples, and finally handling samples with 4 or more sentences. This gradual increase in complexity helps models learn robustly from simple to more complex contexts.
 
+### 📐 Complexity & Difficulty Analysis
+
+Figure 1 provides an overview of the CNF complexity distribution and its relationship with structural depth across the training, validation, and testing datasets.
+
+<p align="center">
+  <img src="ParaLogic-Dataset/images/train_joint_chart.pdf" width="32%" alt="Training Dataset" />
+  <img src="ParaLogic-Dataset/images/val_joint_chart.pdf" width="32%" alt="Validation Dataset" />
+  <img src="ParaLogic-Dataset/images/test_joint_chart.pdf" width="32%" alt="Testing Dataset" />
+  <br>
+  <em>Figure 1: Visualization of Depth, Complexity, Level Distribution and Correlation statistics across datasets.</em>
+</p>
+
+Each dataset split corresponds to one of the visualizations above. Within each, four schematic components are presented: 
+1. **Bar charts** illustrating the CNF depth distributions.
+2. **Bar charts** illustrating the CNF complexity distributions.
+3. **Pie charts** showing the proportion of total instances across four difficulty levels.
+4. **Scatter plots** depicting the correlation between CNF complexity and structural depth.
+
+#### **Distribution & Complexity**
+All splits exhibit a **right-skewed pattern**, with most formulas containing **8-20 clauses**, indicating that simpler logical structures dominate. Based on quartile thresholds of overall complexity, CNF instances are categorized into four levels:
+
+| Difficulty Level | Mean Complexity Score | Proportion (%) |
+| :--- | :--- | :--- |
+| *Easy* | 3.7477 | 34 - 36% |
+| *Medium* | 4.9071 | 17 - 20% |
+| *Hard + Very Hard* | 6.4479 - 10.6203 | 45 - 48% |
+
+#### **Structural Correlation**
+CNF complexity and tree depth exhibit a **strong positive correlation** across all splits, with **Spearman coefficients (ρ)** between **0.917 and 0.927**. This suggests that deeper formulas generally have higher symbolic complexity, and the consistent trend across splits confirms the dataset’s reliability in modeling reasoning difficulty.
+
 ---
 
 ## 🗂️ JSON Summary (for reference)
