@@ -1,7 +1,131 @@
-# Symbolic-JEPA: Where Symbolic AI Meets Joint-Embedding Predictive Architecture for NL–FOL Conversion
+# PARA-LOGIC DATASET
+
+## 📊 Dataset Statistics
+
+This dataset is a paragraph-level corpus, where each sample corresponds to a short text segment containing one or more sentences.
+Samples are categorized by the number of sentences per paragraph (1, 2, 3, or 4+), and divided into train, validation, and test splits.
+Each split contains paired natural language (NL) and first-order logic (FOL) representations.
 
 ---
 
+## 🧩 Overall Summary
+
+<table>
+  <thead>
+    <tr>
+      <th rowspan="2">Category</th>
+      <th rowspan="2">No of Paragraph</th>
+      <th colspan="4">Number of Sentences per Paragraph</th>
+      <th rowspan="2">Total NL sentences</th>
+      <th rowspan="2">Total FOL sentences</th>
+    </tr>
+    <tr>
+      <th>1 Sent</th>
+      <th>2 Sent</th>
+      <th>3 Sent</th>
+      <th>4+ Sent</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Total</strong></td>
+      <td><strong>9344</strong></td>
+      <td>3601</td>
+      <td>1371</td>
+      <td>1444</td>
+      <td>2928</td>
+      <td>28,617</td>
+      <td>28,330</td>
+    </tr>
+    <tr>
+      <td><strong>Train (80%)</strong></td>
+      <td><strong>7478</strong></td>
+      <td>2881</td>
+      <td>1097</td>
+      <td>1156</td>
+      <td>2344</td>
+      <td>22,915</td>
+      <td>22,698</td>
+    </tr>
+    <tr>
+      <td><strong>Validation (10%)</strong></td>
+      <td><strong>933</strong></td>
+      <td>360</td>
+      <td>137</td>
+      <td>144</td>
+      <td>292</td>
+      <td>2,860</td>
+      <td>2,823</td>
+    </tr>
+    <tr>
+      <td><strong>Test (10%)</strong></td>
+      <td><strong>933</strong></td>
+      <td>360</td>
+      <td>137</td>
+      <td>144</td>
+      <td>292</td>
+      <td>2,842</td>
+      <td>2,809</td>
+    </tr>
+  </tbody>
+</table>
+
+---
+
+## 🧠 Notes
+
+- **No of Paragraph** = total number of samples = `1_sent + 2_sent + 3_sent + 4+_sent`.  
+- **“1 Sent”, “2 Sent”, …** denote the count of samples (paragraphs) with that many NL sub-sentences.  
+- **NL sentences**: Total count of all NL sub-sentences.  
+- **FOL sentences**: Total count of all FOL sub-sentences.  
+- Splits follow an **80 / 10 / 10** ratio for training, validation, and testing.
+
+**We intentionally keep samples with a single sentence** to enable a curriculum learning strategy: models can be trained progressively — starting with 1-sentence examples, then moving to 2–3 sentence examples, and finally handling samples with 4 or more sentences. This gradual increase in complexity helps models learn robustly from simple to more complex contexts.
+
+---
+
+## 🗂️ JSON Summary (for reference)
+
+```json
+{
+  "Total": {
+    "1 sentence": 3601,
+    "2 sentences": 1371,
+    "3 sentences": 1444,
+    "4 or more sentences": 2928,
+    "total NL sentences": 28617,
+    "total FOL sentences": 28330
+  },
+  "train": {
+    "1 sentence": 2881,
+    "2 sentences": 1097,
+    "3 sentences": 1156,
+    "4 or more sentences": 2344,
+    "total NL sentences": 22915,
+    "total FOL sentences": 22698
+  },
+  "val": {
+    "1 sentence": 360,
+    "2 sentences": 137,
+    "3 sentences": 144,
+    "4 or more sentences": 292,
+    "total NL sentences": 2860,
+    "total FOL sentences": 2823
+  },
+  "test": {
+    "1 sentence": 360,
+    "2 sentences": 137,
+    "3 sentences": 144,
+    "4 or more sentences": 292,
+    "total NL sentences": 2842,
+    "total FOL sentences": 2809
+  }
+}
+
+
+---
+# Symbolic-JEPA: Where Symbolic AI Meets Joint-Embedding Predictive Architecture for NL–FOL Conversion
+---
 ## 🏗 Repository Structure
 
 The project is organized into modular phases representing the training and evaluation lifecycle:
@@ -107,16 +231,21 @@ pip install -r requirements.txt
 ```
 
 ### 2. Auto-Run the Full Pipeline
+
 You can orchestrate the entire workflow (from pre-training to evaluation) using the master script:
+
 ```bash
 bash script_run.sh
 ```
 
 ### 3. Running Phases Manually
+
 If you want to run or modify specific parts of the architecture, navigate to each module:
 
 #### Step 1: Data Preparation (Structural Labeling)
+
 Generate structure labels (CPP and LDP) for fine-tuning.
+
 ```bash
 conda activate logic_jepa
 cd finetune_prep_phase
@@ -124,28 +253,36 @@ bash run_pipeline.sh --input data/sample.json --output_dir output/
 ```
 
 #### Step 2: Pre-training (Symbolic-JEPA Encoder)
+
 Pre-train the JEPA encoder to learn joint embeddings for NL and FOL.
+
 ```bash
 cd pretrain_phase
 python main.py
 ```
 
 #### Step 3: Fine-tuning (Logic-Structured Decoder)
+
 Fine-tune the T5 model using the pre-trained encoder and structural auxiliary heads.
+
 ```bash
 cd finetune_phase
 python main.py
 ```
 
 #### Step 4: Inference
+
 Generate FOL sequences from Natural Language.
+
 ```bash
 cd finetune_phase
 python inference.py --dataset_path data/test.json --preset B
 ```
 
 #### Step 5: Evaluation
+
 Evaluate the inference results against reference FOL using Syntactic, Semantic, and Logic scores.
+
 ```bash
 conda activate env_metric
 cd metric_eval
