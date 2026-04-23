@@ -4,17 +4,17 @@
 
 The project is organized into modular phases representing the training and evaluation lifecycle:
 
-- [ParaLogic-Dataset/](ParaLogic-Dataset/): The core data repository containing the structured data splits (`train.json`, `test.json`, `val.json`) used for training and evaluation.
-- [pretrain_phase/](pretrain_phase/): Stage 1 training using the JEPA architecture. Focuses on joint embedding of NL and FOL with a masking task and auxiliary structural losses.
-- [finetune_prep_phase/](finetune_prep_phase/): Data preparation for the fine-tuning stage. Parses FOL into trees and generates structural labels (**CPP** and **LDP**).
-- [finetune_phase/](finetune_phase/): Stage 2 training. Fine-tunes a T5 model with structural heads for NL-to-FOL translation using multi-task supervised learning.
-- [metric_eval/](metric_eval/): Comprehensive evaluation suite to assess translation quality across syntax, semantics, and logic.
+- 1) [ParaLogic-Dataset/](ParaLogic-Dataset/): The core data repository containing the structured data splits (`train.json`, `test.json`, `val.json`) used for training and evaluation.
+- 2) [pretrain_phase/](pretrain_phase/): Stage 1 training using the JEPA architecture. Focuses on joint embedding of NL and FOL with a masking task and auxiliary structural losses.
+- 3) [finetune_prep_phase/](finetune_prep_phase/): Data preparation for the fine-tuning stage. Parses FOL into trees and generates structural labels (**CPP** and **LDP**).
+- 4) [finetune_phase/](finetune_phase/): Stage 2 training. Fine-tunes a T5 model with structural heads for NL-to-FOL translation using multi-task supervised learning.
+- 5) [metric_eval/](metric_eval/): Comprehensive evaluation suite to assess translation quality across syntax, semantics, and logic.
 
 ---
 
-## 📊 Para-Logic Dataset
+## 1) Para-Logic Dataset
 
-### 📊 Representative Example
+### Representative Example
 
 We present a representative ParaLogic example to illustrate paragraph-level NL–FOL mapping. Each instance pairs a natural language (NL) paragraph with its corresponding first-order logic (FOL) representation. This example demonstrates the need to integrate multiple sentences into a unified logical structure while maintaining consistency across predicates and variables. Additional examples with different difficulty levels are provided in the Appendix.
 
@@ -38,7 +38,7 @@ We present a representative ParaLogic example to illustrate paragraph-level NL�
 A representative ParaLogic example illustrating paragraph-level composition and logical constraints (Entry 4795, very hard level).
 (nc: number of clauses, mlc: max literals per clause, mdc: max distinct terms, cnf: CNF complexity, d: depth)
 
-### 📊 Dataset Statistics
+### Dataset Statistics
 
 This dataset is a paragraph-level corpus, where each sample corresponds to a short text segment containing one or more sentences.
 Samples are categorized by the number of sentences per paragraph (1, 2, 3, or 4+), and divided into train, validation, and test splits.
@@ -46,7 +46,7 @@ Each split contains paired natural language (NL) and first-order logic (FOL) rep
 
 ---
 
-### 🧩 Overall Summary
+### Overall Summary
 
 <table>
   <thead>
@@ -110,7 +110,7 @@ Each split contains paired natural language (NL) and first-order logic (FOL) rep
 
 ---
 
-## 🧠 Notes
+## Notes
 
 - **No of Paragraph** = total number of samples = `1_sent + 2_sent + 3_sent + 4+_sent`.  
 - **“1 Sent”, “2 Sent”, …** denote the count of samples (paragraphs) with that many NL sub-sentences.  
@@ -120,7 +120,7 @@ Each split contains paired natural language (NL) and first-order logic (FOL) rep
 
 **We intentionally keep samples with a single sentence** to enable a curriculum learning strategy: models can be trained progressively — starting with 1-sentence examples, then moving to 2–3 sentence examples, and finally handling samples with 4 or more sentences. This gradual increase in complexity helps models learn robustly from simple to more complex contexts.
 
-### 📐 Complexity & Difficulty Analysis
+### Complexity & Difficulty Analysis
 
 Figure 1 provides an overview of the CNF complexity distribution and its relationship with structural depth across the training, validation, and testing datasets.
 
@@ -155,7 +155,7 @@ CNF complexity and tree depth exhibit a strong positive correlation across all s
 
 ---
 
-## 🗂️ JSON Summary (for reference)
+## JSON Summary (for reference)
 
 ```json
 {
@@ -193,7 +193,7 @@ CNF complexity and tree depth exhibit a strong positive correlation across all s
 }
 ```
 
-## 📥 Download Pre-processed Datasets
+## Download Pre-processed Datasets
 
 Pre-processed datasets for both pretraining and fine-tuning phases are available for download at the link below:
 
