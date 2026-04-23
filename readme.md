@@ -18,12 +18,16 @@ The project is organized into modular phases representing the training and evalu
 
 We present a representative ParaLogic example to illustrate paragraph-level NL–FOL mapping. Each instance pairs a natural language (NL) paragraph with its corresponding first-order logic (FOL) representation. This example demonstrates the need to integrate multiple sentences into a unified logical structure while maintaining consistency across predicates and variables. Additional examples with different difficulty levels are provided in the Appendix.
 
-<table> <tr> <th style="width:250px">Natural Language (NL)</th> <th style="width:250px">First-Order Logic (FOL)</th> </tr> <tr> <td> A smartphone facilitates communication. It enables voice calls. Smartphones also allow users to send text messages. Furthermore, a smartphone provides internet access. Therefore, a communication tool that enables voice calls, text messages, and internet access is indeed a smartphone. </td> <td> <pre> ∀x (smartphone(x) → communicate_tool(x)) ∀x (smartphone(x) → can_call(x)) ∀x (smartphone(x) → can_send_message(x)) ∀x (smartphone(x) → access_internet(x)) ∀x ((communicate_tool(x) ∧ can_call(x) ∧ can_send_message(x) ∧ access_internet(x)) → smartphone(x))
-[nc=5, mlc=5, mdc=6, cnf=16, d=10]
-</pre>
-</td>
-
-</tr> </table>
+<table> 
+  <tr> <th style="width:250px">Natural Language (NL)</th> <th style="width:250px">First-Order Logic (FOL)</th> </tr> 
+  <tr> 
+    <td> A smartphone facilitates communication. It enables voice calls. Smartphones also allow users to send text messages. Furthermore, a smartphone provides internet access. Therefore, a communication tool that enables voice calls, text messages, and internet access is indeed a smartphone. 
+    </td> 
+    <td> ∀x (smartphone(x) → communicate_tool(x)) ∀x (smartphone(x) → can_call(x)) ∀x (smartphone(x) → can_send_message(x)) ∀x (smartphone(x) → access_internet(x)) ∀x ((communicate_tool(x) ∧ can_call(x) ∧ can_send_message(x) ∧ access_internet(x)) → smartphone(x))
+    [nc=5, mlc=5, mdc=6, cnf=16, d=10]
+    </td>
+  </tr> 
+</table>
 
 A representative ParaLogic example illustrating paragraph-level composition and logical constraints (Entry 4795, very hard level).
 (nc: number of clauses, mlc: max literals per clause, mdc: max distinct terms, cnf: CNF complexity, d: depth)
