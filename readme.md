@@ -23,7 +23,12 @@ We present a representative ParaLogic example to illustrate paragraph-level NL�
   <tr> 
     <td> A smartphone facilitates communication. It enables voice calls. Smartphones also allow users to send text messages. Furthermore, a smartphone provides internet access. Therefore, a communication tool that enables voice calls, text messages, and internet access is indeed a smartphone. 
     </td> 
-    <td> ∀x (smartphone(x) → communicate_tool(x)) ∀x (smartphone(x) → can_call(x)) ∀x (smartphone(x) → can_send_message(x)) ∀x (smartphone(x) → access_internet(x)) ∀x ((communicate_tool(x) ∧ can_call(x) ∧ can_send_message(x) ∧ access_internet(x)) → smartphone(x))
+    <td> 
+      ∀x (smartphone(x) → communicate_tool(x))
+      ∀x (smartphone(x) → can_call(x))
+      ∀x (smartphone(x) → can_send_message(x))
+      ∀x (smartphone(x) → access_internet(x))
+      ∀x ((communicate_tool(x) ∧ can_call(x) ∧ can_send_message(x) ∧ access_internet(x)) → smartphone(x))
     [nc=5, mlc=5, mdc=6, cnf=16, d=10]
     </td>
   </tr> 
