@@ -4,11 +4,11 @@
 
 The project is organized into modular phases representing the training and evaluation lifecycle:
 
-- 1) [ParaLogic-Dataset/](ParaLogic-Dataset/): The core data repository containing the structured data splits (`train.json`, `test.json`, `val.json`) used for training and evaluation.
-- 2) [pretrain_phase/](pretrain_phase/): Stage 1 training using the JEPA architecture. Focuses on joint embedding of NL and FOL with a masking task and auxiliary structural losses.
-- 3) [finetune_prep_phase/](finetune_prep_phase/): Data preparation for the fine-tuning stage. Parses FOL into trees and generates structural labels (**CPP** and **LDP**).
-- 4) [finetune_phase/](finetune_phase/): Stage 2 training. Fine-tunes a T5 model with structural heads for NL-to-FOL translation using multi-task supervised learning.
-- 5) [metric_eval/](metric_eval/): Comprehensive evaluation suite to assess translation quality across syntax, semantics, and logic.
+- [ParaLogic-Dataset/](ParaLogic-Dataset/): The core data repository containing the structured data splits (`train.json`, `test.json`, `val.json`) used for training and evaluation.
+- [pretrain_phase/](pretrain_phase/): Stage 1 training using the JEPA architecture. Focuses on joint embedding of NL and FOL with a masking task and auxiliary structural losses.
+- [finetune_prep_phase/](finetune_prep_phase/): Data preparation for the fine-tuning stage. Parses FOL into trees and generates structural labels (**CPP** and **LDP**).
+- [finetune_phase/](finetune_phase/): Stage 2 training. Fine-tunes a T5 model with structural heads for NL-to-FOL translation using multi-task supervised learning.
+- [metric_eval/](metric_eval/): Comprehensive evaluation suite to assess translation quality across syntax, semantics, and logic.
 
 ---
 
