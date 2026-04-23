@@ -1,0 +1,65 @@
+You are given a list of 45 logical inference rules, such as Modus Ponens, Resolution, Unification, Distribution Law, etc.
+
+Your task is to use any applicable inference rules from this list to transform a set of simple or isolated sentences into one logically coherent and well-structured paragraph. You may rewrite, merge, or slightly modify the sentences as necessary to ensure consistency and logical flow.
+
+**Important instruction:** - The final result **must be a paragraph composed of several short, clear, and logically connected sentences**.  
+- **Do not write a single long sentence**.  
+- **Each idea or inference should ideally be expressed in a separate sentence.** - Use punctuation such as periods (`.`) to break down complex logic into digestible parts.
+
+Example: "Books contain tons of knowledge. When a person reads a book, that person gains knowledge. If a person gains knowledge, they become smarter. Harry read the book Walden by Henry Thoreau."
+---
+
+Here are the inference rules you may apply:
+1. Modus Ponens: If P and (P -> Q) are true, then Q follows.  
+2. Modus Tollens: If (P -> Q) is true and (not Q) is true, then (not P) follows.  
+3. Syllogism Law: If (P -> Q) and (Q -> R), then (P -> R) follows.  
+4. Disjunction Introduction: If P is true, then (P or Q) follows.  
+5. Disjunction Elimination: If (P or Q) and (not P), then Q follows.  
+6. Identity Law: (P and true = P), (P or false = P).  
+7. Negation Law: (P or not P = true), (P and not P = false).  
+8. Distribution Law: (P and (Q or R)) <=> ((P and Q) or (P and R)).  
+9. Association Law: ((P or Q) or R) <=> (P or (Q or R)).  
+10. Commutation Law: (P or Q) <=> (Q or P).  
+11. Absorption Law: (P or (P and Q)) <=> P.  
+12. De Morgan's Law: (not (P or Q)) <=> (not P and not Q).  
+13. Contraposition Law: (P -> Q) <=> (not Q -> not P).  
+14. Conditional Introduction: If P leads to Q, then (P -> Q) follows.  
+15. Proof by Contradiction: If assuming (not P) leads to a contradiction, then P follows.  
+16. Skolemization Law: Replace (exists x P(x)) with P(f(c)).  
+17. Unification Law: Used to unify two logical expressions.  
+18. Resolution Law: If (P or Q) and (not P or R), then (Q or R) follows.  
+19. Identity Substitution Law: If (a = b), replace a with b.  
+20. Function Law: If P(x), then P(f(x)) follows.  
+21. Definition Law: If (P(x) <=> Q(x)), P(x) can be replaced.  
+22. Quantifier Resolution Law: (forall x (P(x) or Q(x))), if (not P(a)), then Q(a).  
+23. Negation of Identity Law: (a != b) <=> (not (a = b)).  
+24. Assumption Law: If P is assumed true to derive Q, then (P -> Q) follows.  
+25. Quantifier Extension Law: If P(x) is true for all x, it is true for a subset.  
+26. Set Law: If (A subseteq B), then (P(A) => P(B)).  
+27. Quantifier Reversal Law: (forall x exists y P(x, y)) <=> (not exists x forall y not P(x, y)).  
+28. Function Transformation Law: (forall x exists y P(x, y)) => P(x, f(x)).  
+29. Function Identity Law: If (forall x (f(x) = g(x))), then (f = g).  
+30. Negation of Assumption Law: If P leads to a contradiction, then (not P) follows.  
+31. Quantifier Negation Law: (not forall x P(x)) <=> (exists x not P(x)).  
+32. Quantifier Conditional Law: (forall x (P(x) or Q)) <=> ((forall x P(x)) or Q).  
+33. Equivalence Law: If (P <-> Q), replace P with Q.  
+34. Advanced Resolution Law: Used in automated theorem proving.  
+35. Instantiation Law: If P(x) is true for all x, then P(c) follows.  
+36. Mathematical Induction Law: Used to prove propositions for all N.  
+37. Skolemization Supplement Law: Uses Skolem functions to eliminate exists.  
+38. Propositional Law: Used in basic propositional logic.  
+39. Double Negation Law: P <=> not (not P).  
+40. Or Introduction Law: P => (P or Q).  
+41. Or Elimination Law: (P or Q) and (not P) => Q.  
+42. Propositional Resolution Law: (P or Q), (not P or R) => (Q or R).  
+43. Set Proof Law: Used in set theory.  
+44. Function Resolution Law: Used in logic programming.  
+45. Extended Skolemization Law: Applied to complex quantifiers.
+
+---
+
+Transform the following sentence(s) into a logically structured sentence using the rules above:
+
+Input: {nl_text}
+
+Output: Returns a paragraph containing the sentences rewritten in a logical way
