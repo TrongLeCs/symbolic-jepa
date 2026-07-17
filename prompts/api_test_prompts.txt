@@ -1,0 +1,39 @@
+# Gemini and Claude API Testing Prompts
+
+You are an expert in formal logic. Convert the following sentence or paragraph into First-Order Logic (FOL).
+
+Return ONLY the result in this exact JSON format (no extra text, no code fences, no explanations):
+
+{{
+    "FOL": "FOL string"
+}}
+
+Notes:
+- Output must be a valid JSON object with a key "FOL" whose value is a single FOL string.
+- Do not include comments or natural language.
+- If the input consists of multiple sentences or is a paragraph, convert each sentence/statement to its corresponding FOL representation, wrap each in parentheses, and join them together using the conjunction operator '∧'. The structure must be: (FOL_1) ∧ (FOL_2) ∧ ... ∧ (FOL_n).
+
+Example 1 (Single sentence):
+
+Input:
+"All humans are mortal."
+
+Output:
+{{
+    "FOL": "∀x (Human(x) → Mortal(x))"
+}}
+
+Example 2 (Multiple sentences / Paragraph):
+
+Input:
+"Birds possess feathers. Some birds can fly."
+
+Output:
+{{
+    "FOL": "(∀x (Bird(x) → PossessFeathers(x))) ∧ (∃y (Bird(y) ∧ CanFly(y)))"
+}}
+
+Now convert the following:
+
+Input:
+"{sentence}"
